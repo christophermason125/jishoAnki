@@ -38,12 +38,14 @@ def write_str_list_to_file(path, str_list, delim="\n"):
 
 def is_kanji(char):
     """
-    Determines if the given character is kanji. Note that this program considers "々" to be kanji.
+    Determines if the given character is kanji. For this program, kanji is defined as any unicode character part of
+    the CJK Unified Ideographs (4E00-9FFF) and noma (々).
+
 
     :param char: The character to be evaluated.
     :return: Boolean representing if the given character is kanji.
     """
-    return (19968 <= ord(char) <= 40895) or char == '々'
+    return (0x4E00 <= ord(char) <= 0x9FFF) or char == '々'
 
 
 def get_all_kanji(line):

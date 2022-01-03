@@ -31,6 +31,37 @@ class KanjiIOTest(unittest.TestCase):
         """
         Tests kanjiIO.write_str_list_to_file
         """
+        kanjiIO.write_str_list_to_file(TEST_OUTPUT_PATH, ["1", "2", "3"])
+        with open(TEST_OUTPUT_PATH, "r") as f:
+            self.assertEqual(f.read(), "1\n2\n3")
+            f.close()
+
+        kanjiIO.write_str_list_to_file(TEST_OUTPUT_PATH, ["1", "2", "3"], delim=",")
+        with open(TEST_OUTPUT_PATH, "r") as f:
+            self.assertEqual(f.read(), "1,2,3")
+            f.close()
+
+    def test_is_kanji(self):
+        """
+        Tests kanjiIO.is_kanji
+        """
+        self.assertFalse(kanjiIO.is_kanji('䷿'))  # 0x4DFF
+        self.assertTrue(kanjiIO.is_kanji('一'))  # 0x4E00
+        self.assertTrue(kanjiIO.is_kanji('丁'))  # 0x4E01
+
+        self.assertTrue(kanjiIO.is_kanji('\u9ffe'))  # 0x9FFE
+        self.assertTrue(kanjiIO.is_kanji('\u9fff'))  # 0x9FFF
+        self.assertFalse(kanjiIO.is_kanji('ꀀ'))  # 0xA000
+
+        self.assertTrue(kanjiIO.is_kanji('々'))
+
+    def test_get_all_kanji(self):
+        """
+        Tests kanjiIO.get_all_kanji
+        """
+        self.assertListEqual(kanjiIO.get_all_kanji("Some text ䷿45丁foo一\u9fffbar\u9ffespam ꀀ egg 々"),
+                             ['々', '一', '丁', '\u9ffe', '\u9fff'])
+        self.assertListEqual(kanjiIO.get_all_kanji("昨日ジョンさんとすき焼きを食べました"), ['日', '昨', '焼', '食'])
 
 
 if __name__ == '__main__':
