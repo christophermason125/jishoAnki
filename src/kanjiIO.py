@@ -3,7 +3,7 @@
 :author: Christopher Mason
 :email: christophermason125@gmail.com
 """
-
+from collections import OrderedDict
 
 WORDS_PATH = "io/common-words.txt"
 KNOWN_KANJI_PATH = "io/known-kanji.txt"
@@ -60,3 +60,41 @@ def get_all_kanji(line):
         if is_kanji(c):
             line_kanji.add(c)
     return sorted(line_kanji)
+
+
+def get_known_kanji_groups(known_kanji_path, delim=":"):
+    """
+    Parses the given known kanji file into an ordered dictionary with label:[kanji_one, kanji_two, ...] key:value pairs.
+
+    :param known_kanji_path: The path to the known kanji file
+    :param delim: The delimiter between the label and the list of kanji.
+    :raise ValueError: If a lines does not contain the delimiter, if there are repeat/empty labels, or if there are
+                       labels with no kanji.
+    :return: The ordered dictionary
+    """
+    known_kanji_lines = get_file_as_str_list(known_kanji_path)
+
+    kanji_groups = OrderedDict()
+    for line_num, line in enumerate(known_kanji_lines):
+        split_line = line.split(delim, 1)
+        if len(split_line) < 2:
+            raise ValueError(f'In {known_kanji_path} at line {line_num}:\n\t"{line}"\n\t'
+                             f"Line does not contain delimiter '{delim}'.")
+
+        label = split_line[0].strip()
+        if label in kanji_groups:
+            raise ValueError(f'In {known_kanji_path} at line {line_num}:\n\t"{line}"\n\t'
+                             f'Label "{label}" already exists.')
+
+        if len(label) == 0:
+            raise ValueError(f'In {known_kanji_path} at line {line_num}:\n\t"{line}"\n\t'
+                             f'Label "{label}" is blank.')
+
+        line_kanji = get_all_kanji(split_line[1])
+        if len(line_kanji) == 0:
+            raise ValueError(f'In {known_kanji_path} at line {line_num}:\n"\t{line}"\n\t'
+                             f'Label "{label}" contains no kanji.')
+
+        kanji_groups[label] = line_kanji
+
+    return kanji_groups

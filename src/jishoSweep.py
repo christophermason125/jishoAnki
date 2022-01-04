@@ -21,8 +21,15 @@ def sweep_jisho(query="%23common%20%23words", min_page=1, max_page=1058):
     :param query: The phrase to be searched on jisho.org as it would appear in a URL.
     :param min_page: The page the sweep is begun on.
     :param max_page: The page the sweep will end on.
+    :raise ValueError: If min_page is greater than max_page or if the query is empty.
     :return: A sorted list of unique entries catalogued by the sweep.
     """
+    if min_page > max_page:
+        raise ValueError(f'Minimum page "{min_pge}" is greater than maximum page "{max_page}".')
+
+    if len(query) == 0:
+        raise ValueError("Query is blank.")
+
     entry_re = re.compile(r'(?s)(?<=<span class="text">).+?(?=</div>)')
     ascii_strip_re = re.compile(r'[\x00-\x7F]')
     entries = set()

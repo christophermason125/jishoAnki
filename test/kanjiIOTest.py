@@ -63,6 +63,12 @@ class KanjiIOTest(unittest.TestCase):
                              ['々', '一', '丁', '\u9ffe', '\u9fff'])
         self.assertListEqual(kanjiIO.get_all_kanji("昨日ジョンさんとすき焼きを食べました"), ['日', '昨', '焼', '食'])
 
+    def test_get_known_kanji_groups(self):
+        """
+        Tests kanjiIO.get_known_kanji_groups
+        """
+
+
 
 if __name__ == '__main__':
     unittest.main()

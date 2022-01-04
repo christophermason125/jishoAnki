@@ -4,29 +4,9 @@
 :email: christophermason125@gmail.com
 """
 
-
-from collections import OrderedDict
-
 import src.kanjiIO
 from kanjiIO import *
-
-
-class FormatException(Exception):
-    """
-    Exception thrown for an incorrectly formatted known kanji file.
-    """
-    def __init__(self, path, line_num, line, message):
-        """
-        Initializes the instance with an expression describing the location in the known kanji list where the error
-        occurred. The message describes the format error at that location.
-
-        :param path: The path to the known kanji file.
-        :param line_num: The line number in the known kanji file that the error occurred at.
-        :param line: The contents of the line in the known kanji file that the error occurred in.
-        :param message: A description of the format error that occurred.
-        """
-        self.expression = f'In {path} at line {line_num}:\n"{line}".'
-        self.message = message
+from src.kanjiIO import get_known_kanji_groups
 
 
 def get_key_from_value_elem(e, d):
@@ -42,41 +22,6 @@ def get_key_from_value_elem(e, d):
             return k
 
 
-def get_kanji_groups(known_kanji_path, delim=":"):
-    """
-    Parses the given known kanji path into an ordered dictionary with group_name:[all, kanji] key:value pairs.
-
-    :param known_kanji_path: The path to the known kanji file
-    :param delim: The delimiter between the group name and the list of kanji.
-    :return: The ordered dictionary
-    """
-    known_kanji_lines = get_file_as_str_list(known_kanji_path)
-
-    kanji_groups = OrderedDict()
-    for line in known_kanji_lines:
-        split_line = line.split(delim, 1)
-        if len(split_line) < 2:
-            raise FormatException(KNOWN_KANJI_PATH, known_kanji_lines.index(line), line,
-                                  f'Line does not contain delimiter "{delim}".')
-
-        label = split_line[0].strip()
-        if label in kanji_groups:
-            raise FormatException(KNOWN_KANJI_PATH, known_kanji_lines.index(line), line, f'Label "{label}" already '
-                                                                                         f'exists.')
-
-        if len(label) == 0:
-            raise FormatException(KNOWN_KANJI_PATH, known_kanji_lines.index(line), line, f'Label "{label}" is blank.')
-
-        line_kanji = src.kanjiIO.get_all_kanji(split_line[1])
-        if len(line_kanji) == 0:
-            raise FormatException(KNOWN_KANJI_PATH, known_kanji_lines.index(line), line, f'Label "{label}" contains '
-                                                                                         f'no kanji.')
-
-        kanji_groups[label] = line_kanji
-
-    return kanji_groups
-
-
 def get_vocab(words_path, known_kanji_path, words_delim="\n", known_kanji_delim=":"):
     """
     Creates an ordered dictionary containing all group names found in known_kanji_path as keys. These keys are mapped
@@ -90,7 +35,7 @@ def get_vocab(words_path, known_kanji_path, words_delim="\n", known_kanji_delim=
     :return: An ordered list of kanji groups and their vocabulary words.
     """
     words = get_file_as_str_list(words_path, words_delim)
-    kanji_groups = get_kanji_groups(known_kanji_path, known_kanji_delim)
+    kanji_groups = get_known_kanji_groups(known_kanji_path, known_kanji_delim)
 
     vocab = OrderedDict()
     kg_keys = list(kanji_groups.keys())
