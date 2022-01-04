@@ -75,24 +75,24 @@ def get_known_kanji_groups(known_kanji_path, delim=":"):
     known_kanji_lines = get_file_as_str_list(known_kanji_path)
 
     kanji_groups = OrderedDict()
-    for line_num, line in enumerate(known_kanji_lines):
+    for line_num, line in enumerate(known_kanji_lines, 1):
         split_line = line.split(delim, 1)
         if len(split_line) < 2:
-            raise ValueError(f'In {known_kanji_path} at line {line_num}:\n\t"{line}"\n\t'
+            raise ValueError(f'In {known_kanji_path} on line {line_num}...\n\t"{line}"\n\t'
                              f"Line does not contain delimiter '{delim}'.")
 
         label = split_line[0].strip()
         if label in kanji_groups:
-            raise ValueError(f'In {known_kanji_path} at line {line_num}:\n\t"{line}"\n\t'
+            raise ValueError(f'In {known_kanji_path} on line {line_num}...\n\t"{line}"\n\t'
                              f'Label "{label}" already exists.')
 
         if len(label) == 0:
-            raise ValueError(f'In {known_kanji_path} at line {line_num}:\n\t"{line}"\n\t'
-                             f'Label "{label}" is blank.')
+            raise ValueError(f'In {known_kanji_path} on line {line_num}...\n\t"{line}"\n\t'
+                             f'Label is blank.')
 
         line_kanji = get_all_kanji(split_line[1])
         if len(line_kanji) == 0:
-            raise ValueError(f'In {known_kanji_path} at line {line_num}:\n"\t{line}"\n\t'
+            raise ValueError(f'In {known_kanji_path} on line {line_num}:\n\t"{line}"\n\t'
                              f'Label "{label}" contains no kanji.')
 
         kanji_groups[label] = line_kanji

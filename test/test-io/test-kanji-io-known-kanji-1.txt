@@ -1,0 +1,3 @@
+Numbers: 一二三四五六七八九十
+Random Sentence: foo 昨日ジョン bar さんとすきspam 焼きを食べ egg ました。
+Just One: 一

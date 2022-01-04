@@ -3,14 +3,20 @@
 :author: Christopher Mason
 :email: christophermason125@gmail.com
 """
-
+from collections import OrderedDict
 
 import src.kanjiIO as kanjiIO
 import unittest
 
 
-TEST_INPUT_PATH = "test-io/test-input.txt"
-TEST_OUTPUT_PATH = "test-io/test-output.txt"
+TEST_INPUT_PATH = "test-io/test-kanji-io-input.txt"
+TEST_OUTPUT_PATH = "test-io/test-kanji-io-output.txt"
+TEST_KK_1 = "test-io/test-kanji-io-known-kanji-1.txt"
+TEST_KK_2 = "test-io/test-kanji-io-known-kanji-2.txt"
+TEST_KK_3 = "test-io/test-kanji-io-known-kanji-3.txt"
+TEST_KK_4 = "test-io/test-kanji-io-known-kanji-4.txt"
+TEST_KK_5 = "test-io/test-kanji-io-known-kanji-5.txt"
+TEST_KK_6 = "test-io/test-kanji-io-known-kanji-6.txt"
 
 
 class KanjiIOTest(unittest.TestCase):
@@ -24,7 +30,7 @@ class KanjiIOTest(unittest.TestCase):
         """
         result = kanjiIO.get_file_as_str_list(TEST_INPUT_PATH)
         self.assertListEqual(result, ["1,2,3", "4,5,6", "7,8,9"])
-        result = kanjiIO.get_file_as_str_list(TEST_INPUT_PATH, delim=",")
+        result = kanjiIO.get_file_as_str_list(TEST_INPUT_PATH, delim=',')
         self.assertListEqual(result, ["1", "2", "3\n4", "5", "6\n7", "8", "9"])
 
     def test_write_str_list_to_file(self):
@@ -67,7 +73,27 @@ class KanjiIOTest(unittest.TestCase):
         """
         Tests kanjiIO.get_known_kanji_groups
         """
+        expected = OrderedDict()
+        expected["Numbers"] = ['一', '七', '三', '九', '二', '五', '八', '六', '十', '四']
+        expected["Random Sentence"] = ['日', '昨', '焼', '食']
+        expected["Just One"] = ['一']
+        result = kanjiIO.get_known_kanji_groups(TEST_KK_1)
+        self.assertDictEqual(result, expected)
 
+        result = kanjiIO.get_known_kanji_groups(TEST_KK_2, delim='~')
+        self.assertDictEqual(result, expected)
+
+        with self.assertRaises(ValueError):
+            kanjiIO.get_known_kanji_groups(TEST_KK_3)
+
+        with self.assertRaises(ValueError):
+            kanjiIO.get_known_kanji_groups(TEST_KK_4)
+
+        with self.assertRaises(ValueError):
+            kanjiIO.get_known_kanji_groups(TEST_KK_5)
+
+        with self.assertRaises(ValueError):
+            kanjiIO.get_known_kanji_groups(TEST_KK_6)
 
 
 if __name__ == '__main__':
