@@ -3,6 +3,8 @@
 :author: Christopher Mason
 :email: christophermason125@gmail.com
 """
+
+
 from collections import OrderedDict
 
 import src.kanjiIO as kanjiIO

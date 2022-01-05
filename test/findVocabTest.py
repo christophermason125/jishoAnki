@@ -1,3 +1,10 @@
+"""
+:file: findVocabTest.py
+:author: Christopher Mason
+:email: christophermason125@gmail.com
+"""
+
+
 import unittest
 from collections import OrderedDict
 
