@@ -10,7 +10,7 @@ import urllib
 import re
 from copy import copy
 
-from bs4 import BeautifulSoup
+import bs4
 
 
 def prune_candidate(candidate):
@@ -23,11 +23,13 @@ def prune_candidate(candidate):
     # Removes the hyperlinks beneath the entry labels.
     status = candidate.find("div", class_=re.compile(r"^concept_light-status"))
 
-    for child in status.children:
-        if child.name != "span":
+    # We cannot use the generator status.children because this loop removes children as it iterates.
+    # This means we have to traverse the children backwards.
+    for child in status.contents[::-1]:
+        if isinstance(child, bs4.element.Tag) and child.name != "span":
             child.decompose()
 
-    # Removes any other hyperlink that does not actually redirect.
+    # Removes any other hyperlinks that don't actually redirect.
     stagnant_links = candidate.find_all("a", href="#")
 
     for stagnant_link in stagnant_links:
@@ -43,8 +45,6 @@ def prune_candidate(candidate):
 
     for short_link in need_jisho_dot_org:
         short_link["href"] = "https://jisho.org" + short_link["href"]
-
-
 
 
 def get_vocab_html(query, exact=True, limit=10):
@@ -64,23 +64,28 @@ def get_vocab_html(query, exact=True, limit=10):
 
     url_vocab = urllib.parse.quote(query, safe='')
     html = requests.get(f"https://jisho.org/search/{url_vocab}").text
-    soup = BeautifulSoup(html, "html.parser")
+    soup = bs4.BeautifulSoup(html, "html.parser")
 
     # First we take only the main results containing the entries.
-    soup = soup.find("div", id="main_results")
+    back_soup = soup.find("div", id="main_results")
 
-    # We don't need the side panel
-    soup.find("div", id="secondary").decompose()
+    # We just need the primary column
+    row = back_soup.find("div", class_="row")
+
+    # Traversing backwards without generator because tags are removed mid-traversal
+    for child in row.contents[::-1]:
+        if isinstance(child, bs4.element.Tag) and (not child.has_attr("id") or child["id"] != "primary"):
+            child.decompose()
 
     # Then we get rid of the "Words" header.
-    soup.find("h4").decompose()
+    back_soup.find("h4").decompose()
 
     # If only exact matches are wanted then the other concepts should be removed.
     if exact:
-        soup.find("div", class_="concepts").decompose()
+        back_soup.find("div", class_="concepts").decompose()
 
     # Then we find all entry tags and prune the relevant entries. We aso remove any beyond the limit specified.
-    candidates = soup.find_all("div", class_="concept_light clearfix")
+    candidates = back_soup.find_all("div", class_="concept_light clearfix")
 
     if len(candidates) == 0:
         return None, None
@@ -92,13 +97,15 @@ def get_vocab_html(query, exact=True, limit=10):
             candidate.decompose()
 
     # The back is finished. The front will now be pruned further.
-    front_soup = copy(soup)
+    front_soup = copy(back_soup)
 
     # This is a separate tree so the candidates need to be found again
     front_candidates = front_soup.find_all(class_="concept_light clearfix")
 
-    # TODO We just need the first entry
+    # We just need the first entry
 
+    for candidate in front_candidates[1:]:
+        candidate.decompose()
 
     # We will remove the definition. It wouldn't be a very good flashcard otherwise.
     front_soup.find("div", class_="concept_light-meanings medium-9 columns").decompose()
@@ -107,7 +114,7 @@ def get_vocab_html(query, exact=True, limit=10):
     front_soup.find("a", class_="light-details_link").decompose()
 
     # Now we remove the labels
-    front_soup.find("div", class_="concept_light-status").decompose()
+    front_soup.find("div", class_=re.compile(r"^concept_light-status\b")).decompose()
 
     # We want to hide the readings without removing the padding, so we will delete the text instead.
     furigana = front_soup.find("span", class_="furigana")
@@ -115,5 +122,5 @@ def get_vocab_html(query, exact=True, limit=10):
         if span.string is not None:
             span.string.replace_with("")
 
-    # We want to add <p></p> at the very start for padding.
-    front_soup.insert_before(front_soup.new_tag("p"))
+    # Cannot return prettified html because that adds newlines between kanji spans
+    return str(front_soup), str(back_soup)

@@ -7,19 +7,27 @@
 import unittest
 import src.parseVocabHTML as parseVocabHTML
 
-NEKO_HTML_PATH = "test-io/test-parse-neko.html"
+TOSHI_FRONT_PATH = "test-io/test-parse-toshi-front.html"
+TOSHI_BACK_PATH = "test-io/test-parse-toshi-back.html"
 
 
 class ParseVocabHTMLTest(unittest.TestCase):
+    """
+    Tests parseVocabHTML.py
+    """
 
     def test_get_vocab_html(self):
-        with open(NEKO_HTML_PATH, 'r', encoding="utf8") as file:
-            expected = file.read()
-            file.close()
-        toru_front, toru_back = parseVocabHTML.get_vocab_html("取る #common")
+        """
+        Tests parseVocabHTML.get_vocab_html
+        """
+        toshi_front, toshi_back = parseVocabHTML.get_vocab_html("年 #common")
 
-        print(toru_front)
-        print(toru_back)
+        with open(TOSHI_FRONT_PATH, 'r', encoding="utf8") as f:
+            self.assertEqual(f.read(), toshi_front)
+            f.close()
+        with open(TOSHI_BACK_PATH, 'r', encoding="utf8") as f:
+            self.assertEqual(f.read(), toshi_back)
+            f.close()
 
 
 if __name__ == '__main__':

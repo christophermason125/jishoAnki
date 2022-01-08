@@ -5,9 +5,6 @@
 """
 from collections import OrderedDict
 
-WORDS_PATH = "io/common-words.txt"
-KNOWN_KANJI_PATH = "io/known-kanji.txt"
-
 
 def get_file_as_str_list(path, delim="\n"):
     """
